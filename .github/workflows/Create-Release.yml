@@ -1,4 +1,4 @@
-ame: Create Archive
+name: Create release zip
 on: [push]
 jobs:
   build:
