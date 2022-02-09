@@ -18,7 +18,7 @@ Remove-Item -Path $Env:TEMP\$tag.zip -Force -ErrorAction SilentlyContinue
 Write-Host Dowloading latest release
 Invoke-WebRequest $download -Out $Env:TEMP\$tag.zip
 
-Remove-Item -Path $ENV:TEMP\UTS-PS-$tag -Force -Recurse
+Remove-Item -Path $ENV:TEMP\UTS-PS-$tag -Force -Recurse -ErrorAction SilentlyContinue
 Write-Host Extracting release files
 Expand-Archive -Path $Env:TEMP\$tag.zip -Force -DestinationPath $ENV:TEMP\UTS-PS-$tag
 # Clear out target folder
