@@ -2,50 +2,50 @@ name: Process release
 on:
   push:
 jobs:
-  advanceLatestTag:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Advance latest tag
-      uses: actions/github-script@v3
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}          
-        script: |
-          try {
-              await github.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/latest"
-              })
-          } catch (e) {
-            console.log("The latest tag doesn't exist yet: " + e)
-          }
-          await github.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: "refs/tags/latest",
-            sha: context.sha
-          })
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Archive Release
-      uses: thedoctor0/zip-release@master
-      with:
-        type: 'zip'
-        filename: 'release.zip'
-        exclusions: '*.git*'
-    # - name: Upload Release
-    #   uses: ncipollo/release-action@v1
-    #   with:
-    #     artifacts: "release.zip"
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "release.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: lates
+  # advanceLatestTag:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Advance latest tag
+  #     uses: actions/github-script@v3
+  #     with:
+  #       github-token: ${{secrets.GITHUB_TOKEN}}          
+  #       script: |
+  #         try {
+  #             await github.git.deleteRef({
+  #               owner: context.repo.owner,
+  #               repo: context.repo.repo,
+  #               ref: "tags/latest"
+  #             })
+  #         } catch (e) {
+  #           console.log("The latest tag doesn't exist yet: " + e)
+  #         }
+  #         await github.git.createRef({
+  #           owner: context.repo.owner,
+  #           repo: context.repo.repo,
+  #           ref: "refs/tags/latest",
+  #           sha: context.sha
+  #         })
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - name: Archive Release
+  #     uses: thedoctor0/zip-release@master
+  #     with:
+  #       type: 'zip'
+  #       filename: 'release.zip'
+  #       exclusions: '*.git*'
+  #   # - name: Upload Release
+  #   #   uses: ncipollo/release-action@v1
+  #   #   with:
+  #   #     artifacts: "release.zip"
+  #   #     token: ${{ secrets.GITHUB_TOKEN }}
+  #   - name: Upload Release
+  #     uses: ncipollo/release-action@v1
+  #     with:
+  #       artifacts: "release.zip"
+  #       token: ${{ secrets.GITHUB_TOKEN }}
+  #       tag: lates
   create_versioned_release:
     runs-on: ubuntu-latest
     steps:
