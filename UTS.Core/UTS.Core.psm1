@@ -57,19 +57,22 @@ function Update-UTSPS {
     # Remove v from tag because its not there in folder
     $versionNumber = $tag.replace('v','')
     Write-Verbose "Copying module to target folder"
-    Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\* -Recurse
+    Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\ -Recurse
     #endregion Copy files to module folder
 
     #region Update version number
     Write-Verbose "Updating version number in module manifests"
-    Get-ChildItem $UTSModuleFolder -Filter *.psd1 -Recurse | Format-Table
-    Get-ChildItem $UTSModuleFolder -Filter *.psd1 -Recurse | 
-        Foreach-Object {
-             $OriginalManifest = get-content -Path $_.FullName -Raw
-             $UpdatedManifest = $OriginalManifest -replace "0.0.0",$versionNumber
-             Write-Host $UpdatedManifest
-             Set-Content -Path $_.FullName -Value $UpdatedManifest
-        }
+    $psd1Files = Get-ChildItem $UTSModuleFolder -Filter *.psd1 -Recurse
+    Write-Debug "Found module manifests: [$psd1Files]"
+    $psd1Files | Foreach-Object {
+        Write-Debug "Getting module manifest from [$_.FullName]"
+        $OriginalManifest = get-content -Path $_.FullName -Raw
+        Write-Debug "Updating manifst version number to [$versionNumber]"
+        $UpdatedManifest = $OriginalManifest -replace "0.0.0",$versionNumber
+        Write-Debug "Outputting updated manifest to [$_.FullName]"
+        # Write-Host $UpdatedManifest
+        Set-Content -Path $_.FullName -Value $UpdatedManifest
+    }
     
     #endregion Update version number
 }

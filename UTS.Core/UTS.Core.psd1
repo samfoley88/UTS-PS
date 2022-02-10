@@ -12,7 +12,7 @@
     RootModule = 'UTS.Core'
     
     # Version number of this module.
-    ModuleVersion = '0.0.0'
+    ModuleVersion = ''
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -122,3 +122,5 @@
     }
     
     
+
+
