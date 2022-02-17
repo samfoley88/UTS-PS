@@ -10,7 +10,7 @@ function Get-UTSElevatedLogins {
 
     Write-Verbose "Getting elevated logins"
     Write-Debug "Fetching events from the last $Age hours from log"
-    $ElevatedLogins = Get-EventLog -LogName Security -After (Get-Date).AddHours(-$Age) | Where-Object { $_.Message -match 'Elevated Token:\s*%%1843' }
+    $ElevatedLogins = Get-EventLog -LogName Security -After (Get-Date).AddHours(-$Age) | Where-Object { $_.Message -match 'Elevated Token:\s*%%1842' }
     Write-Debug "Fetched elevated login events from log, found [$($ElevatedLogins.Count)] events"
 
     $ElevatedLoginsToReturn = New-Object System.Collections.ArrayList
