@@ -1,3 +1,6 @@
+# Including other files
+Import-Module -Force -Name "$PSScriptRoot\UTS.Monitoring.Security.psm1"
+
 function Get-UTSConnectivity {
     [CmdletBinding()]
     param (
