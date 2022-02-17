@@ -18,13 +18,19 @@ function Update-UTSPS {
     #endregion Define variables
 
     #region Check Access
+    Write-Debug "Creating modules folder if it doesn't exist"
+    New-Item -ItemType Directory -Force -Path $UTSModuleFolder
+
     Write-Verbose "Checking for write access to modules folder"
-    try {
-            Out-File -FilePath "$UTSModuleFolder\WritePermissionsTest.txt"
+    Write-Debug "Checking access for by writing [$UTSModuleFolder\WritePermissionsTest.txt]"
+    
+    try { 
+        Out-File -FilePath "$UTSModuleFolder\WritePermissionsTest.txt"
+        Remove-Item -Path "$UTSModuleFolder\WritePermissionsTest.txt"
     }
     catch {
         Write-Error "No write access to modules folder"
-        return
+        exit 2
     }
     #endregion Check Access
 
@@ -35,7 +41,7 @@ function Update-UTSPS {
     $releases = "https://api.github.com/repos/$repo/releases"
 
     Write-Verbose "Getting the latest release from GitHub"
-    $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
+    $tag = (Invoke-WebRequest -UseBasicParsing $releases | ConvertFrom-Json)[0].tag_name
     Write-Information "Latest release tag is $tag"
     $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
 
@@ -43,7 +49,7 @@ function Update-UTSPS {
     Write-Verbose "Deleting existing zip file (if it exists)"
     Remove-Item -Path $Env:TEMP\$tag.zip -Force -ErrorAction SilentlyContinue
     Write-Verbose "Dowloading latest release"
-    Invoke-WebRequest $download -Out $Env:TEMP\$tag.zip
+    Invoke-WebRequest -UseBasicParsing $download -Out $Env:TEMP\$tag.zip
 
     Write-Verbose "Removing old zip folder (if it exists)"
     Remove-Item -Path $ENV:TEMP\UTS-PS-$tag -Force -Recurse -ErrorAction SilentlyContinue
