@@ -75,6 +75,8 @@ function Update-UTSPS {
     #endregion Download and unzip release
     
      #region Update version number
+     # Remove v from tag because its not part of the version number itself
+     $versionNumber = $tag.replace('v','')
      Write-Verbose "Updating version number in module manifests"
      $psd1Files = Get-ChildItem $ENV:TEMP\UTS-PS-$tag -Filter *.psd1 -Recurse
      Write-Debug "Found module manifests: [$psd1Files]"
@@ -93,8 +95,7 @@ function Update-UTSPS {
     #region Copy files to module folder
     Write-Verbose "Clearing out [$PSModuleFolder] of all items starting 'UTS.'"
     Get-ChildItem -Path $PowerShellModulesFolder -Directory | Where-Object {$_.Name -match "^UTS\."} | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
-    # Remove v from tag because its not there in folder
-    $versionNumber = $tag.replace('v','')
+    
     Write-Verbose "Copying modules to [$PowerShellModulesFolder] folder"
     Get-ChildItem -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\" -Directory | Where-Object {$_.Name -notmatch "^\."} | Copy-Item -Destination $PowerShellModulesFolder -Recurse
     # Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\ -Recurse 
