@@ -29,19 +29,16 @@ function Update-UTSPS {
     )
     
     #region Define variables
-    $UTSModuleFolder = "$env:ProgramFiles\WindowsPowerShell\Modules\UTS"
+    $PowerShellModulesFolder = "$env:ProgramFiles\WindowsPowerShell\Modules"
     #endregion Define variables
 
     #region Check Access
-    Write-Debug "Creating modules folder if it doesn't exist"
-    New-Item -ItemType Directory -Force -Path $UTSModuleFolder
-
     Write-Verbose "Checking for write access to modules folder"
-    Write-Debug "Checking access for by writing [$UTSModuleFolder\WritePermissionsTest.txt]"
+    Write-Debug "Checking access for by writing [$PowerShellModulesFolder\WritePermissionsTest.txt]"
     
     try { 
-        Out-File -FilePath "$UTSModuleFolder\WritePermissionsTest.txt"
-        Remove-Item -Path "$UTSModuleFolder\WritePermissionsTest.txt"
+        Out-File -FilePath "$PowerShellModulesFolder\WritePermissionsTest.txt"
+        Remove-Item -Path "$PowerShellModulesFolder\WritePermissionsTest.txt"
     }
     catch {
         Write-Error "No write access to modules folder"
@@ -77,30 +74,34 @@ function Update-UTSPS {
     Expand-Archive -Path $Env:TEMP\$tag.zip -Force -DestinationPath $ENV:TEMP\UTS-PS-$tag
     #endregion Download and unzip release
     
+     #region Update version number
+     Write-Verbose "Updating version number in module manifests"
+     $psd1Files = Get-ChildItem $ENV:TEMP\UTS-PS-$tag -Filter *.psd1 -Recurse
+     Write-Debug "Found module manifests: [$psd1Files]"
+     $psd1Files | Foreach-Object {
+         Write-Debug "Getting module manifest from [$_.FullName]"
+         $OriginalManifest = get-content -Path $_.FullName -Raw
+         Write-Debug "Updating manifst version number to [$versionNumber]"
+         $UpdatedManifest = $OriginalManifest -replace "0.0.0",$versionNumber
+         Write-Debug "Outputting updated manifest to [$_.FullName]"
+         # Write-Host $UpdatedManifest
+         Set-Content -Path $_.FullName -Value $UpdatedManifest
+     }
+     
+     #endregion Update version number
+
     #region Copy files to module folder
-    Write-Verbose "Clearing out target folder at $UTSModuleFolder\*"
-    Remove-Item -Path $UTSModuleFolder\* -Force -Recurse -ErrorAction SilentlyContinue
+    Write-Verbose "Clearing out [$PSModuleFolder] of all items starting 'UTS.'"
+    Get-ChildItem -Path $PowerShellModulesFolder -Directory | Where-Object {$_.Name -match "^UTS\."} | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
     # Remove v from tag because its not there in folder
     $versionNumber = $tag.replace('v','')
-    Write-Verbose "Copying module to target folder"
-    Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\ -Recurse
+    Write-Verbose "Copying modules to [$PowerShellModulesFolder] folder"
+    Get-ChildItem -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\" -Directory | Where-Object {$_.Name -notmatch "^\."} | Copy-Item -Destination $PowerShellModulesFolder -Recurse
+    # Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\ -Recurse 
+
     #endregion Copy files to module folder
 
-    #region Update version number
-    Write-Verbose "Updating version number in module manifests"
-    $psd1Files = Get-ChildItem $UTSModuleFolder -Filter *.psd1 -Recurse
-    Write-Debug "Found module manifests: [$psd1Files]"
-    $psd1Files | Foreach-Object {
-        Write-Debug "Getting module manifest from [$_.FullName]"
-        $OriginalManifest = get-content -Path $_.FullName -Raw
-        Write-Debug "Updating manifst version number to [$versionNumber]"
-        $UpdatedManifest = $OriginalManifest -replace "0.0.0",$versionNumber
-        Write-Debug "Outputting updated manifest to [$_.FullName]"
-        # Write-Host $UpdatedManifest
-        Set-Content -Path $_.FullName -Value $UpdatedManifest
-    }
-    
-    #endregion Update version number
+   
 }
 
 # 
