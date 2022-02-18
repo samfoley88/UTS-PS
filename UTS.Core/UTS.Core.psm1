@@ -66,6 +66,11 @@ function Update-UTSPS {
     Write-Verbose "Dowloading latest release"
     Invoke-WebRequest -UseBasicParsing $download -Out $Env:TEMP\$tag.zip
 
+    Write-Verbose "Checking size of file"
+    $size = (Get-Item -Path $Env:TEMP\$tag.zip).Length
+    $sizeMB = $size / 1MB
+    Write-Verbose "File size is $size bytes, which is $sizeMB MB"
+
     Write-Verbose "Removing old zip folder (if it exists)"
     Remove-Item -Path $ENV:TEMP\UTS-PS-$tag -Force -Recurse -ErrorAction SilentlyContinue
     Write-Verbose "Extracting zip file to temp folder"
