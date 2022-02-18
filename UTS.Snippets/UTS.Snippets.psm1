@@ -11,8 +11,3 @@ function Get-UTSRandomPassword {
     Add-Type -AssemblyName 'System.Web'
     return [System.Web.Security.Membership]::GeneratePassword($length, $amountOfNonAlphanumeric)
 }
-
-
-$PlainPassword = Get-RandomPassword -length 40
-$SecurePassword = ConvertTo-SecureString -AsPlainText -Force -String $PlainPassword
-Set-LocalUser -Name LifeSaver -Password $SecurePassword -PasswordNeverExpires $True
