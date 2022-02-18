@@ -155,7 +155,7 @@ function Get-UTSUnprocessed {
         Write-Debug "Getting history"
         $HistoryFileRaw = Get-Content -Path $HistoryFile -Raw
         Write-Debug "History raw file is: [$HistoryFileRaw]"
-        if ($HistoryFileRaw -eq $null) {
+        if ($null -eq $HistoryFileRaw) {
             Write-Debug "History file is empty"
             $History = New-Object System.Collections.Generic.List[Hashtable]
         } else {
