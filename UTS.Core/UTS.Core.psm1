@@ -185,12 +185,12 @@ function Get-UTSUnprocessed {
     
     Write-Debug "Comparing new array to history"
     foreach ($item in $Array) {
-        Write-Debug "Checking if [$item.$FilteringProperty] is in history"
+        Write-Debug "Checking if [$($item.$FilteringProperty)] is in history"
         if ($History -contains $item.$FilteringProperty) {
-            Write-Debug "Found [$item.$FilteringProperty] in history"
+            Write-Debug "Found [$($item.$FilteringProperty)] in history"
         } else {
-            Write-Debug "Did not find [$item.$FilteringProperty] in history"
-            Write-Debug "Adding [$item.$FilteringProperty] to history"
+            Write-Debug "Did not find [$($item.$FilteringProperty)] in history"
+            Write-Debug "Adding [$($item.$FilteringProperty)] to history"
             $History += $item.$FilteringProperty
             Write-Debug "Adding item to return array"
             $NewItems += $item
