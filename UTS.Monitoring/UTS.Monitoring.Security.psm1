@@ -1,5 +1,4 @@
-# TODO:
-# - Check on other machines and filter appropriately for acceptable ones etc
+
 function Get-UTSElevatedLogins {
     [CmdletBinding()]
     param (
@@ -12,6 +11,8 @@ function Get-UTSElevatedLogins {
     Write-Debug "Fetching events from the last $Age hours from log"
     $ElevatedLogins = Get-EventLog -LogName Security -After (Get-Date).AddHours(-$Age) | Where-Object { $_.Message -match 'Elevated Token:\s*%%1842' }
     Write-Debug "Fetched elevated login events from log, found [$($ElevatedLogins.Count)] events"
+
+    
 
     $ElevatedLoginsToReturn = New-Object System.Collections.ArrayList
 
@@ -64,6 +65,7 @@ function Get-UTSElevatedLogins {
                 LogonID = $LogonID
                 SourceNetworkAddress = $SourceNetworkAddress
                 SourcePort = $SourcePort
+                Index = $_.Index
             }
             $ElevatedLoginsToReturn.Add($NewElevatedLoginsToReturn) | Out-Null
         }
