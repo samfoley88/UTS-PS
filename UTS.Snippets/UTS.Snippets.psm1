@@ -5,16 +5,26 @@ function Get-UTSAllHistory {
 function Get-UTSRandomPassword {
     param (
         [Parameter()]
-        [int] $length = 40,
-        [int] $amountOfNonAlphanumeric = 1
+        [int] $Length = 40,
+        [int] $MinSpecialChars = 1,
+        [switch] $SecureString = $false
     )
     Add-Type -AssemblyName 'System.Web'
-    return [System.Web.Security.Membership]::GeneratePassword($length, $amountOfNonAlphanumeric)
+    $password = [System.Web.Security.Membership]::GeneratePassword($Length, $MinSpecialChars)
+
+    if ($SecureString) {
+        Write-Information "Generated password is:"
+        Write-Information $password
+        $PasswordSecureString = ConvertTo-SecureString -String $password -AsPlainText -Force
+        return $PasswordSecureString
+    } else {
+        return $password
+    }
+
 }
 
-# Add documentation comment
 function Get-UTSVariablesFromJson {
-    <#
+<#
     .SYNOPSIS
         Converts a JSON string (single level) to individual variables.
     .OUTPUTS
