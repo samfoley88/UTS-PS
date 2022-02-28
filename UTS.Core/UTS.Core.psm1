@@ -101,7 +101,9 @@ function Update-UTSPS {
     
     Write-Verbose "Copying modules to [$PowerShellModulesFolder] folder"
     Get-ChildItem -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\" -Directory | Where-Object {$_.Name -notmatch "^\."} | Copy-Item -Destination $PowerShellModulesFolder -Recurse
-    # Copy-Item -Path "$ENV:TEMP\UTS-PS-$tag\UTS-PS-$versionNumber\*" -Destination $UTSModuleFolder\ -Recurse 
+    
+    Write-Verbose "Forcing update of all UTS modules loaded in the current session"
+    Get-Module UTS* | Import-Module -Force
 
     #endregion Copy files to module folder
 
