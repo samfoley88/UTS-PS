@@ -52,6 +52,9 @@ function Update-UTSPS {
 
     $releases = "https://api.github.com/repos/$repo/releases"
 
+    Write-Verbose "Changing PS to use updated (more secure) SSL settings to allow connection"
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
     Write-Verbose "Getting the latest release from GitHub"
     $tag = (Invoke-WebRequest -UseBasicParsing $releases | ConvertFrom-Json)[0].tag_name
     Write-Information "Latest release tag is $tag"
