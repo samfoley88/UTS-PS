@@ -55,6 +55,7 @@ function Test-UTSDomainConnectivity {
 
     #region Define variables
     $Warning = [System.Collections.Generic.List[string]]::new()
+    $OurCheckErrors = [System.Collections.Generic.List[string]]::new()
     #endregion Definte variables
 
     #region Check all DNS Servers are private
@@ -83,13 +84,18 @@ function Test-UTSDomainConnectivity {
 
     $LDAPRecords = Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
     if ($null -eq $LDAPRecords) {
-        $NewWarning = "No LDAP Records found for domain [$Domain]"
-        Write-Verbose $NewWarning
-        $Warning = $Warning + $NewWarning
+        $NewOurCheckError = "No LDAP Records found for domain [$Domain]"
+        Write-Verbose $NewOurCheckError
+        $OurCheckError = $OurCheckError + $NewOurCheckError
     } else {
         Write-Verbose "LDAP records found"
         $LDAPRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
-            Test-Connection $_.IP4Address -Count 1 | Out-Null
+            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
+            if ($ConnectionTestResult -eq $false) {
+                $NewOurCheckError = "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
+                Write-Verbose $NewOurCheckError
+                $OurCheckError = $OurCheckError + $NewOurCheckError
+            }
         }
     }
     
@@ -99,18 +105,22 @@ function Test-UTSDomainConnectivity {
 
     $kerberosRecords = Resolve-DnsName -Name "_kerberos._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
     if ($null -eq $kerberosRecords) {
-        $NewWarning = "No kerberos Records found for domain [$Domain]"
-        Write-Verbose $NewWarning
-        $Warning = $Warning + $NewWarning
+        $NewOurCheckError = "No kerberos Records found for domain [$Domain]"
+        Write-Verbose $NewOurCheckError
+        $OurCheckError = $OurCheckError + $NewOurCheckError
     } else {
         Write-Verbose "kerberos records found"
         $kerberosRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
-            Test-Connection $_.IP4Address -Count 1 | Out-Null
+            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
+            if ($ConnectionTestResult -eq $false) {
+                $NewOurCheckError = "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
+                Write-Verbose $NewOurCheckError
+                $OurCheckError = $OurCheckError + $NewOurCheckError
+            }
         }
     }
     
-    Write-Verbose "kerberos test completed"
-    
+    Write-Verbose "kerberos test completed"    
     
     #endregion Check all DNS servers resolve the domain kerberos and kerberos records
 
@@ -134,13 +144,25 @@ function Test-UTSDomainConnectivity {
 
     if ($Warning.Count -gt 0) {
         Write-Information "`n`n-------------------Warnings------------------"
+        Write-Information "`n Warnings aren't necessarily something wrong but if you have domain related issues they should be fixed."
         Write-Information "The following warnings were raised:"
         $WarningString = $Warning -Join "`n"
         Write-Information $WarningString
         Write-Information "------------------------------------------------`n`n"
+    } else {
+        Write-Verbose "No warnings were raised"
+    }
+
+    if ($OurCheckErrors.Count -gt 0) {
+        Write-Information "`n`n-------------------Errors------------------"
+        Write-Information "`n These are errors, the domain is not working correctly for this device."
+        Write-Information "The following errors were raised:"
+        $OurCheckErrorsString = $OurCheckErrors -Join "`n"
+        Write-Information $OurCheckErrorsString
+        Write-Information "------------------------------------------------`n`n"
         return $False
     } else {
-        Write-Information "No warnings were raised, returning true"
+        Write-Information "No errors were raised, returning true"
         return $True
     }
 }
