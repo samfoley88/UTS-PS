@@ -132,7 +132,7 @@ function Test-UTSDomainConnectivity {
         
     Write-Information "All checks are finished."
 
-    if ($null -ne $Warning) {
+    if ($Warning.Count() -gt 0) {
         Write-Information "`n`n-------------------Warnings------------------"
         Write-Information "The following warnings were raised:"
         $WarningString = $Warning -Join "`n"
