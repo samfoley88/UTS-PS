@@ -138,14 +138,18 @@ function Test-UTSDomainConnectivity {
         Write-Information "Final check finished."
     } else {
         Write-Information "Computer is not part of a domain, not running final check"
+        $NewWarning = "The computer is not domain joined"
+        Write-Verbose $NewWarning
+        $Warning = $Warning + $NewWarning
+        
     }
         
     Write-Information "All checks are finished."
 
     if ($Warning.Count -gt 0) {
         Write-Information "`n`n-------------------Warnings------------------"
-        Write-Information "`n Warnings aren't necessarily something wrong but if you have domain related issues they should be fixed."
-        Write-Information "The following warnings were raised:"
+        Write-Information "Warnings aren't necessarily something wrong but if you have domain related issues they should be fixed."
+        Write-Information "The following warnings were raised:`n"
         $WarningString = $Warning -Join "`n"
         Write-Information $WarningString
         Write-Information "------------------------------------------------`n`n"
@@ -155,8 +159,8 @@ function Test-UTSDomainConnectivity {
 
     if ($OurCheckErrors.Count -gt 0) {
         Write-Information "`n`n-------------------Errors------------------"
-        Write-Information "`n These are errors, the domain is not working correctly for this device."
-        Write-Information "The following errors were raised:"
+        Write-Information "These are errors, the domain is not working correctly for this device."
+        Write-Information "The following errors were raised:`n"
         $OurCheckErrorsString = $OurCheckErrors -Join "`n"
         Write-Information $OurCheckErrorsString
         Write-Information "------------------------------------------------`n`n"
