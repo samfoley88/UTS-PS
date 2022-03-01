@@ -104,7 +104,9 @@ function Update-UTSPS {
     
     Write-Verbose "Forcing update of all UTS modules loaded in the current session"
     Get-Module UTS* | Import-Module -Force
-
+    Write-Information "UTS modules updated, new version is: $tag"
+    Write-Information "To update active modules in this session run the below command."
+    Write-Information "Get-Module UTS* | Import-Module -Force"
     #endregion Copy files to module folder
 
    
