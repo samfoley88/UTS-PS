@@ -42,7 +42,12 @@ function Test-UTSDomainConnectivity {
     .SYNOPSIS
         Test connectivity to the domain stepping through each possible issue type Basic DNS -> SRV -> Host resolution -> Trust test
     .OUTPUTS
-        Write errors to Warning, and info and verbose to those respectively
+        Returns True or False based on whether the machine is successfully connected to a domain (or not domain joined at all). Warnings will also appear if you turn on output from the information stream.
+        Writes all the results to the information feed (view from console with $InformationPreference = "Continue").
+    .DESCRIPTION
+        This function will test connectivity to the domain by stepping through each possible issue type.
+        If any of the issues are found, the function will return False.
+        If there are no issues, the function will return True.
     .EXAMPLE
         # To view the output of this function, use the following command
         $InformationPreference = $VerbosePreference = "Continue"
