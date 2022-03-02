@@ -39,7 +39,19 @@ function Get-UTSElevatedLogins {
             Write-Debug "Source Network Address: $SourceNetworkAddress"
             Write-Debug "Source Port: $SourcePort"
         }
+
+        #region New Method: Extract from replacement strings
+        $NewLogonSecurityID = $_.ReplacementStrings[0]
+        #endregion New Method: Extract from replacement strings
+
+
         #endregion Extract data from log
+
+        # Check if this is a system account login
+        if ($NewLogonSecurityID = "S-1-5-18") {
+            Write-Verbose "This is a system account login, skipping, login name was: [$AccountName]"
+            continue
+        }
 
         #Define interesting login types
         $InterestingLogonTypes = @(
