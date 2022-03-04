@@ -50,3 +50,40 @@ For logging use the following for the specific purpose
     #>
 ```
 And a comment line before each paramater.
+
+# Repository Management
+## Commit Messages
+We follow the conventional commits and semantic versioning standards. Our Github repo automatically versions based on these. Those standards are available at:
+
+https://semver.org/
+
+https://www.conventionalcommits.org/en/v1.0.0/#specification
+
+We REQUIRE a scope for the commit message. This should be either the function name or the module name if multiple functions have been changed.
+
+
+The commit message format is:
+```
+<type>(Scope): <Short description>
+<Long description>
+```
+**Type**
+- *feat* - new feature
+- *feat.part* - new feature worked on but not yet usable
+- *fix* - a fix to an issue OR a non-breaking change
+- *docs* - updates to documentation
+- *chore* - changes that don't affect the code that aren't covered by the above
+
+**Scope**
+
+The function worked on, or if multiple functions are worked on the module name.
+
+**Short description**
+
+A short description of the changes made written in the paste tense!
+
+These are compressed into release notes so bear that in mind when writing.
+
+**Long description**
+
+Optional to provide additional detail or context on the changes made.
