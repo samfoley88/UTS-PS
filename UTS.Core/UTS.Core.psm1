@@ -1,3 +1,7 @@
+# Import submodules
+Import-Module -Force -Name "$PSScriptRoot\UTS.Core.Logging.psm1"
+
+
 #region Create Module Variable Hashtable
 $UTSCoreVariables = [ordered]@{
     UTSDataStorePath           = "$($env:ProgramFiles)\UTS\DataStore";
