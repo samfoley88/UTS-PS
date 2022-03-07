@@ -82,7 +82,14 @@ function Get-UTSTimestamp {
         .EXAMPLE
             '
     #>
-
+    param(
+        # To return the timestamp in a file friendly ""yyyy-MM-dd-HH.mm.ss" format
+        [Parameter()]
+        [switch] $ForFile
+    )
     
+    if ($ForFile) {
+        return Get-Date -Format 'yyyy-MM-dd-HH.mm.ss'
+    }
     return Get-Date -Format "yyyy-MM-dd | HH:mm:ss.ffff"
 }
