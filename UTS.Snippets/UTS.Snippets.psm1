@@ -70,3 +70,19 @@ function Test-UTSPrivateIP {
         $false
     }
 }
+
+function Get-UTSTimestamp {
+    <#
+        .SYNOPSIS
+            Returns a timestamp in the format YYYY-MM-DD HH:MM:SS
+        .DESCRIPTION
+            Returns a timestamp in the format YYYY-MM-DD HH:MM:SS
+        .EXAMPLE
+            Get-UTSTimestamp
+        .EXAMPLE
+            '
+    #>
+
+    
+    return Get-Date -Format "yyyy-MM-dd | HH:mm:ss.ffff"
+}
