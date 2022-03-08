@@ -51,7 +51,7 @@ Copyright = '(c) 2022 Unified Technical Solutions Ltd. All rights reserved.'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @("Posh-SSH")
+RequiredModules = @("Posh-SSH", @{ModuleName="Posh-SSH"; ModuleVersion="3.0.0"; GUID="f5c99306-7b5a-4fca-a052-f79ad1e48fbf"})
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
