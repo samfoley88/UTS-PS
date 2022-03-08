@@ -44,28 +44,6 @@ function Get-UTSVariablesFromJson {
 
 }
 
-function ConvertFrom-UTSJsonFile {
-    [CmdletBinding()]
-    param (
-        [Parameter()]
-        [string]
-        $File
-    )
-    Write-Verbose "Checking if [$File] exists"
-    if (Test-Path -Path $File -PathType Leaf) {
-        Write-Verbose "[$File] found"
-        Write-Verbose "Getting json from file [$File]"
-        $JsonFileRaw = Get-Content -Path $File -Raw
-        Write-Debug "Raw json: [$JsonFileRaw]"
-        $ReturnedObject = ConvertFrom-Json $JsonFileRaw
-        Write-Debug "Converted and returning"
-        return $ReturnedObject
-    } else {
-        return $null
-    }
-        
-
-}
 
 function Test-UTSPrivateIP {
     <#
