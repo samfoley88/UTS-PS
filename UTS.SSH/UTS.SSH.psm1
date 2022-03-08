@@ -31,6 +31,12 @@ function Invoke-UTSSSHCommand {
         $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile C:\Users\samfo\.ssh\multipass.openssh
     }
 
+    if (!$session) {
+        Write-UTSError "Failed to create session"
+        Invoke-UTSLogOutput
+        return $False
+    }
+
     #endregion Creating session
 
     #region Executing commands
@@ -49,15 +55,22 @@ function Invoke-UTSSSHCommand {
             Write-Debug "$($Result.Output)"
             Write-Debug "############## Result ends ###############"
         
+        } else {
+            Write-Verbose "Command failed with exit code: [$Result.ExitStatus]"
+            Write-Verbose "Enable debug to see output"
+            Write-Debug "############## Result begins ###############"
+            Write-Debug "$($Result.Output)"
+            Write-Debug "############## Result ends ###############"
+            Write-UTSError "Command [$Command] failed with exit code: [$Result.ExitStatus]. Message was [$($Result.Output)]"
         }
     }
 
     #endregion Executing commands
 
-    #region Cleanup
+    #region Cleanup and finalise
     Remove-SSHSession -SSHSession $session
-    #endregion Cleanup
+    Invoke-UTSLogOutput
+    #endregion Cleanup and finalise
+
 
 }
-
-Invoke-UTSSSHCommand -ComputerName "192.168.0.10" -SingleCommand "whoami" -SSHUser "ubuntu" -SSHKey C:\Users\samfo\.ssh\multipass.openssh
