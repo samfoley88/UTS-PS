@@ -32,7 +32,7 @@ function Invoke-UTSSSHCommand {
     }
 
     if (!$session) {
-        Write-UTSError "Failed to create session"
+        Write-UTSError "Failed to create session. Error given was: $($Error.CategoryInfo)"
         Invoke-UTSLogOutput
         return $False
     }
