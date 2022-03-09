@@ -132,7 +132,11 @@ function Invoke-UTSLogOutput {
         Write-Information $ErrorsMessage
         
         # If required log the message to RMM
-        if ((Get-Command RMM-Alert -ErrorAction "Ignore") -and ($RMMAlertCategory -ne $null)) {
+        if ((Get-Command RMM-Alert -ErrorAction "Ignore")) {
+            if ($RMMAlertCategory -eq ""){
+                Write-Debug "RMM alert category not set, setting to default 'Default Script Alert'"
+                $RMMAlertCategory = "Default Script Alert"
+            }
             Write-Debug "Detected Syncro Module and RMM Category, creating RMM Alert for errors"
             Rmm-Alert -Category $RMMAlertCategory -Body $ErrorsMessage
         }
@@ -153,6 +157,3 @@ function Invoke-UTSLogOutput {
 
     return $ReturnValue
 }
-
-
-Invoke-UTSLogOutput
