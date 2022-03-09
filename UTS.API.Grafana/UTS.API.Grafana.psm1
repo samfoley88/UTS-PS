@@ -28,14 +28,14 @@ function Backup-UTSGrafanaAllDashboards {
     $headers=@{}
     $headers.Add("Authorization", "Basic $BasicAuthEncoded")
     Write-Verbose "Getting all dashboards"
-    $response = Invoke-WebRequest -Uri "$GrafanaURL/api/search" -Method GET -Headers $headers
+    $response = Invoke-WebRequest -Uri "$GrafanaURL/api/search" -Method GET -Headers $headers -UseBasicParsing
     Write-Verbose "Parsing response"
     # Set-Content -Value $response.Content -Path "ReturnedJson.json"
     $Dashboards = ConvertFrom-Json -InputObject $response.Content
     
     foreach ($Dashboard in $Dashboards) {
         Write-Verbose "Getting dashboard [$($Dashboard.title)] with id [$($Dashboard.id)] and uid [$($Dashboard.uid)]"
-        $response = Invoke-WebRequest -Uri "$GrafanaURL/api/dashboards/uid/$($Dashboard.uid)" -Method GET -Headers $headers
+        $response = Invoke-WebRequest -Uri "$GrafanaURL/api/dashboards/uid/$($Dashboard.uid)" -Method GET -Headers $headers -UseBasicParsing
         Write-Verbose "Writing raw dashboard to file"
         Set-Content -Value $response.Content -Path "./$($Dashboard.title)-unedited.json"
 
