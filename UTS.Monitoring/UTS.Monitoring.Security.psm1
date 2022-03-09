@@ -22,7 +22,7 @@ function Get-UTSElevatedLogins {
         #region Extract data from log
         #region New Method: Extract from replacement strings
         $NewLogonSecurityID = $_.ReplacementStrings[4]
-        $LogonType = $_.ReplacementStrings[8]
+        $LogonType = [int]$_.ReplacementStrings[8]
         $AccountName = $_.ReplacementStrings[5]
         $AccountDomain = $_.ReplacementStrings[6]
         $LogonID = $_.ReplacementStrings[7]
@@ -51,24 +51,25 @@ function Get-UTSElevatedLogins {
         }
 
         #Define interesting login types
-        $InterestingLogonTypes = @(
-            '2', # Interactive
-            '3', # Network
-            '4', # Batch
-            '7', # Unlock
-            '9', # New credentials, ie RunAs
-            '10', # RemoteInteractive, ie RDP
-            '11', # Cached credentials (ie no network access)
-            '12', # Cached credentials for network login (ie no network access)
-            '13' # Cached credentials for unlock (ie no network access)
-        )
+        $InterestingLogonTypes = @{
+            2 = "Interactive"
+            3 = "Network"
+            4 = "Batch"
+            7 = "Unlock"
+            9 = "New credentials, ie RunAs"
+            10 = "RemoteInteractive, ie RDP"
+            11 = "Cached credential login"
+            12 = "Cached credentials for network login"
+            13 = "Cached credentials for unlock"
+        }
 
         # If the logon type is one of the interesting types, add it to the list
-        if ($InterestingLogonTypes -contains $LogonType) {
+        if ($InterestingLogonTypes.ContainsKey($LogonType)) {
             Write-Verbose "Interesting logon type found, adding to list"
             $NewElevatedLoginsToReturn = [PSCustomObject]@{
                 Time     = $_.TimeGenerated
                 LogonType = $LogonType
+                LogonTypeFriendlyName = $InterestingLogonTypes[$LogonType]
                 AccountName = $AccountName
                 AccountDomain = $AccountDomain
                 LogonID = $LogonID
@@ -85,4 +86,4 @@ function Get-UTSElevatedLogins {
     
 }
 
-Get-UTSElevatedLogins | Format-Table
+#Get-UTSElevatedLogins | Format-Table
