@@ -1,4 +1,4 @@
-
+#$DebugPreference = $VerbosePreference = $InformationPreference = "Continue"
 function Get-UTSElevatedLogins {
     [CmdletBinding()]
     param (
@@ -20,37 +20,34 @@ function Get-UTSElevatedLogins {
     $ElevatedLogins | ForEach-Object {
         
         #region Extract data from log
-        # Regex to get the data we need from the event
-        $RegexResults = $_.Message | Select-String -Pattern '(?sm)Logon Type:\s*([^\s]*)\s*Restricted Admin Mode:.*New Logon:.*Account Name:\s*([^\s]*)\s*Account Domain:\s*([^\s]*)\s*Logon ID:.*Source Network Address:\s*([\S]*)\s*Source Port' -AllMatches
-        
-        # Assign results to variables
-        $RegexResults | ForEach-Object {
-            $LogonType = $RegexResults.Matches.Groups[1].Value
-            $AccountName = $RegexResults.Matches.Groups[2].Value
-            $AccountDomain = $RegexResults.Matches.Groups[3].Value
-            $LogonID = $RegexResults.Matches.Groups[4].Value
-            $SourceNetworkAddress = $RegexResults.Matches.Groups[5].Value
-            $SourcePort = $RegexResults.Matches.Groups[6].Value
-            
-            Write-Debug "Logon Type: $LogonType"
-            Write-Debug "Account Name: $AccountName"
-            Write-Debug "Account Domain: $AccountDomain"
-            Write-Debug "Logon ID: $LogonID"
-            Write-Debug "Source Network Address: $SourceNetworkAddress"
-            Write-Debug "Source Port: $SourcePort"
-        }
-
         #region New Method: Extract from replacement strings
-        $NewLogonSecurityID = $_.ReplacementStrings[0]
+        $NewLogonSecurityID = $_.ReplacementStrings[4]
+        $LogonType = $_.ReplacementStrings[8]
+        $AccountName = $_.ReplacementStrings[5]
+        $AccountDomain = $_.ReplacementStrings[6]
+        $LogonID = $_.ReplacementStrings[7]
+        $SourceNetworkAddress = $_.ReplacementStrings[13]
+        $SourcePort = $_.ReplacementStrings[14]
+        
+        Write-Debug "Event Index: $($_.Index)"
+        Write-Debug "Logon Type: $LogonType"
+        Write-Debug "Account Name: $AccountName"
+        Write-Debug "Account Domain: $AccountDomain"
+        Write-Debug "Logon ID: $LogonID"
+        Write-Debug "Source Network Address: $SourceNetworkAddress"
+        Write-Debug "Source Port: $SourcePort"
+
+        
         #endregion New Method: Extract from replacement strings
 
 
         #endregion Extract data from log
 
         # Check if this is a system account login
-        if ($NewLogonSecurityID = "S-1-5-18") {
+        if ($NewLogonSecurityID -eq "S-1-5-18") {
             Write-Verbose "This is a system account login, skipping, login name was: [$AccountName]"
-            continue
+            # We use return because the ForEach-Object loop will continue to the next iteration using this rather than continue. This appears to be because its executed as a script block not a true loop.
+            return
         }
 
         #Define interesting login types
@@ -88,4 +85,4 @@ function Get-UTSElevatedLogins {
     
 }
 
-#Get-UTSElevatedLogins | Format-Table
+Get-UTSElevatedLogins | Format-Table
