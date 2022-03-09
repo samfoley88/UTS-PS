@@ -37,15 +37,21 @@ function Invoke-UTSSSHCommand {
     
     #region Creating session
     Write-Verbose "Creating session"
+    $SSHSessionParams = @{
+        ComputerName = $ComputerName
+    }
+    if ($AutoApproveHostKey) {
+        $SSHSessionParams.Add("AcceptKey", $true)
+    }
     if ($SSHPassword) {
         Write-Verbose "Creating session with password"
         $SSHPassword = ConvertTo-SecureString $SSHPassword -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential($SSHUser, $SSHPassword)
-        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -AcceptKey $AutoApproveHostKey
+        $session = New-SSHSession -Credential $Credential @SSHSessionParams
     } elseif ($SSHKey) {
         Write-Verbose "Creating session with key"
         $Credential = New-Object System.Management.Automation.PSCredential($SSHUser, (New-Object System.Security.SecureString))
-        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile $SSHKey -AcceptKey $AutoApproveHostKey
+        $session = New-SSHSession -Credential $Credential -KeyFile $SSHKey @SSHSessionParams
     }
 
     if (!$session) {
