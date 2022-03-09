@@ -28,7 +28,7 @@ function Invoke-UTSSSHCommand {
     } elseif ($SSHKey) {
         Write-Verbose "Creating session with key"
         $Credential = New-Object System.Management.Automation.PSCredential($SSHUser, (New-Object System.Security.SecureString))
-        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile C:\Users\samfo\.ssh\multipass.openssh
+        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile $SSHKey
     }
 
     if (!$session) {
