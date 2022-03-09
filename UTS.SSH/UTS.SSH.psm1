@@ -4,18 +4,35 @@ $DebugPreference = "Continue"
 
 function Invoke-UTSSSHCommand {
     param (
+        # The name/IP of the target
         [Parameter(Mandatory=$true)]
-        [string]$ComputerName,
+        [string]
+        $ComputerName,
+        # SSH username to use
         [Parameter()]
-        [string]$SSHUser,
+        [string]
+        $SSHUser,
+        # SSH password to use
         [Parameter()]
-        [string]$SSHPassword,
+        [string]
+        $SSHPassword,
+        # SSH Key to use
         [Parameter()]
-        [string]$SSHKey,
+        [string]
+        $SSHKey,
+        # Single command to execute
         [Parameter()]
-        [string]$SingleCommand,
+        [string]
+        $SingleCommand,
+        # Array of commands to execute
         [Parameter()]
-        [System.Collections.Generic.List[string]]$CommandList
+        [System.Collections.Generic.List[string]]
+        $CommandList,
+        # Automatically approve the host key
+        [Parameter()]
+        [switch]
+        $AutoApproveHostKey
+
     )
     
     #region Creating session
@@ -24,11 +41,11 @@ function Invoke-UTSSSHCommand {
         Write-Verbose "Creating session with password"
         $SSHPassword = ConvertTo-SecureString $SSHPassword -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential($SSHUser, $SSHPassword)
-        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential
+        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -AcceptKey $AutoApproveHostKey
     } elseif ($SSHKey) {
         Write-Verbose "Creating session with key"
         $Credential = New-Object System.Management.Automation.PSCredential($SSHUser, (New-Object System.Security.SecureString))
-        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile $SSHKey
+        $session = New-SSHSession -ComputerName $ComputerName -Credential $Credential -KeyFile $SSHKey -AcceptKey $AutoApproveHostKey
     }
 
     if (!$session) {
