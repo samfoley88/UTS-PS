@@ -12,7 +12,13 @@ function Get-UTSElevatedLogins {
     $ElevatedLogins = Get-EventLog -LogName Security -After (Get-Date).AddHours(-$Age) | Where-Object { $_.Message -match 'Elevated Token:\s*%%1842' }
     Write-Debug "Fetched elevated login events from log, found [$($ElevatedLogins.Count)] events"
 
-    
+    Write-Verbose "Getting computer accounts to compare with"
+    # Check if this is a computer account login
+    if (Get-Command Get-ADComputer -ErrorAction Ignore) {
+        $ADComputerAccounts = Get-ADComputer -Filter * | Select-Object SamAccountName
+    } else {
+        $ADComputerAccounts = @("")
+    }
 
     $ElevatedLoginsToReturn = New-Object System.Collections.ArrayList
 
@@ -46,6 +52,13 @@ function Get-UTSElevatedLogins {
         # Check if this is a system account login
         if ($NewLogonSecurityID -eq "S-1-5-18") {
             Write-Verbose "This is a system account login, skipping, login name was: [$AccountName]"
+            # We use return because the ForEach-Object loop will continue to the next iteration using this rather than continue. This appears to be because its executed as a script block not a true loop.
+            return
+        }
+
+        # Check if this is a computer account login
+        if ($ADComputerAccounts -contains $AccountName) {
+            Write-Verbose "This is a computer account login, skipping, login name was: [$AccountName]"
             # We use return because the ForEach-Object loop will continue to the next iteration using this rather than continue. This appears to be because its executed as a script block not a true loop.
             return
         }
