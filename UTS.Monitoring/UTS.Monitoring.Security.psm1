@@ -99,4 +99,72 @@ function Get-UTSElevatedLogins {
     
 }
 
-#Get-UTSElevatedLogins | Format-Table
+function Test-UTSNoNewElevatedLogins {
+    <#
+    .SYNOPSIS
+        Tests whether there are any new elevated logins in the last 2 hours
+    .OUTPUTS
+        Returns True if there are no elevated logins, False if there are.
+        Further info is logged to RMM (if run from there) or to the Information stream on the console
+    .EXAMPLE
+        $InformationPreference = "Continue"; Test-UTSNoNewElevatedLogins
+        
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [int]
+        $Age
+    )
+
+    if ($Age -ne $null) {
+        Write-Verbose "Using age of [$Age] hours"
+        $AgeParam = @{
+            Age = $Age
+        }
+    } else {
+        $AgeParam = @{}
+    }
+
+    Write-Verbose "Checking for elevated access events in Windows event log"
+    $ElevatedLogins = Get-UTSElevatedLogins @AgeParam
+
+    if ($null -ne $ElevatedLogins) {
+        Write-Verbose "Removing any events we've seen before"
+        $ElevatedLogins = Get-UTSUnprocessed -Array $ElevatedLogins -FilteringProperty "Index" -UniqueHistoryId "ElevatedLoginsCheck"
+    }
+    
+    if ($null -ne $ElevatedLogins) {
+        Write-Verbose "Found new elevated login events"
+        # Sort by datetime
+        $ElevatedLogins = $ElevatedLogins | Sort-Object -Descending -Property Time 
+        if ($ElevatedLogins.Count -gt 10) {
+            Write-Debug "Array count is greater than 10, trimming to ten"
+            $ElevatedLogins = $ElevatedLogins | Select-Object -First 10
+            Write-Debug "Converting returned array to table format"
+            $ElevatedLoginsString = "10 most recent logins below, run Get-UTSElevatedLogins locally for full list."
+            $ElevatedLoginsString += $ElevatedLogins | Format-Table | Out-String
+        } else {
+            Write-Debug "Converting returned array to table format"
+            $ElevatedLoginsString = "Full list of elevated logins follows:"
+            $ElevatedLoginsString += $ElevatedLogins | Format-Table | Out-String
+        }
+        
+        Write-Information "ElevatedLoginsString begins:"
+        Write-Information $ElevatedLoginsString
+        Write-Information "String is finished"
+        
+        # If RMM is available
+        if ((Get-Command RMM-Alert -ErrorAction "Ignore")) {
+            $RMMAlertCategory = "Elevated Login"
+            Write-Debug "Detected Syncro Module and RMM Category, creating RMM Alert for errors"
+            Rmm-Alert -Category $RMMAlertCategory -Body $ElevatedLoginsString
+            Write-Debug "Should have just created an rmmalert"
+        }
+
+        
+        return $False
+    } else {
+        return $True
+    }
+}
