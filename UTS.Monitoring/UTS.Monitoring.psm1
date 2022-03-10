@@ -76,12 +76,6 @@ function Test-UTSDomainConnectivity {
         }
         $Domain = $SystemInfo.Domain
     }
-
-    #region Define variables 
-    $Warning = [System.Collections.Generic.List[string]]::new() 
-    $OurCheckError = [System.Collections.Generic.List[string]]::new() 
-    #endregion Definte variables 
-    
     
 
 
@@ -94,9 +88,7 @@ function Test-UTSDomainConnectivity {
         if (Test-UTSPrivateIP -IP $_) {
             Write-Verbose "$_ is a private IP"
         } else {
-            $NewWarning = "$_ is a public IP"
-            Write-Verbose $NewWarning
-            $Warning = $Warning + $NewWarning
+            Write-UTSWarning "$_ is a public IP"
         }
     }
     Write-Information "Finished DNS Private IP Checks."
@@ -111,17 +103,13 @@ function Test-UTSDomainConnectivity {
 
     $LDAPRecords = Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
     if ($null -eq $LDAPRecords) {
-        $NewOurCheckError = "No LDAP Records found for domain [$Domain]"
-        Write-Verbose $NewOurCheckError
-        $OurCheckError = $OurCheckError + $NewOurCheckError
+        Write-UTSError "No LDAP Records found for domain [$Domain]"
     } else {
         Write-Verbose "LDAP records found"
         $LDAPRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
             $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
             if ($ConnectionTestResult -eq $false) {
-                $NewOurCheckError = "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
-                Write-Verbose $NewOurCheckError
-                $OurCheckError = $OurCheckError + $NewOurCheckError
+                Write-UTSError "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
             }
         }
     }
@@ -132,17 +120,13 @@ function Test-UTSDomainConnectivity {
 
     $kerberosRecords = Resolve-DnsName -Name "_kerberos._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
     if ($null -eq $kerberosRecords) {
-        $NewOurCheckError = "No kerberos Records found for domain [$Domain]"
-        Write-Verbose $NewOurCheckError
-        $OurCheckError = $OurCheckError + $NewOurCheckError
+        Write-UTSError "No kerberos Records found for domain [$Domain]"
     } else {
         Write-Verbose "kerberos records found"
         $kerberosRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
             $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
             if ($ConnectionTestResult -eq $false) {
-                $NewOurCheckError = "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
-                Write-Verbose $NewOurCheckError
-                $OurCheckError = $OurCheckError + $NewOurCheckError
+                Write-UTSError = "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
             }
         }
     }
@@ -154,46 +138,21 @@ function Test-UTSDomainConnectivity {
     Write-Information "Finished testing domain controllers."
 
     Write-Information "Running final domain connection check"
-    if ((Get-WmiObject -Class Win32_ComputerSystem).PartOfDomain){
+    if ($SystemInfo.DomainRole -in @(0,2)) {
+        Write-Verbose "This computer is not joined to a domain so not running Test-ComputerSecureChannel"
+    } elseif ($SystemInfo.DomainRole -in @(5, 4)){
+        Write-Verbose "This computer is a domain controller so not running Test-ComputerSecureChannel"
+    } else {
         $SecureChannel = Test-ComputerSecureChannel -ErrorAction "SilentlyContinue"
         if ($SecureChannel -eq $false) {
             
-            $NewWarning = "Test-ComputerSecureChannel failed"
-            Write-Verbose $NewWarning
-            $Warning = $Warning + $NewWarning
+            Write-UTSError "Test-ComputerSecureChannel failed"
         }
         Write-Information "Final check finished."
-    } else {
-        Write-Information "Computer is not part of a domain, not running final check"
-        $NewWarning = "The computer is not domain joined"
-        Write-Verbose $NewWarning
-        $Warning = $Warning + $NewWarning
-        
     }
         
     Write-Information "All checks are finished."
 
-    if ($Warning.Count -gt 0) {
-        Write-Information "`n`n-------------------Warnings------------------"
-        Write-Information "Warnings aren't necessarily something wrong but if you have domain related issues they should be fixed."
-        Write-Information "The following warnings were raised:`n"
-        $WarningString = $Warning -Join "`n"
-        Write-Information $WarningString
-        Write-Information "------------------------------------------------`n`n"
-    } else {
-        Write-Verbose "No warnings were raised"
-    }
+    return Invoke-UTSLogOutput
 
-    if ($OurCheckError.Count -gt 0) {
-        Write-Information "`n`n-------------------Errors------------------"
-        Write-Information "These are errors, the domain is not working correctly for this device."
-        Write-Information "The following errors were raised:`n"
-        $OurCheckErrorsString = $OurCheckError -Join "`n"
-        Write-Information $OurCheckErrorsString
-        Write-Information "------------------------------------------------`n`n"
-        return $False
-    } else {
-        Write-Information "No errors were raised, returning true"
-        return $True
-    }
 }
