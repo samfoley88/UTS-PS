@@ -128,6 +128,7 @@ function Invoke-UTSLogOutput {
         $UTSErrorsString = $UTSErrors -Join "`n"
         $ErrorsMessage += $UTSErrorsString
         $ErrorsMessage += "`n------------------------------------------------`n"
+        $ErrorsMessage += "Module version is: $(Get-Module UTS.Core | Select-Object -ExpandProperty Version | ForEach-Object { $_.ToString() })`n"
         # Output the error message
         Write-Information $ErrorsMessage
         
