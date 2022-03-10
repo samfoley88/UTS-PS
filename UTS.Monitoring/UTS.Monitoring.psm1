@@ -1,3 +1,5 @@
+# $DebugPreference = $VerbosePreference = "Continue"
+
 # Including other files
 Import-Module -Force -Name "$PSScriptRoot\UTS.Monitoring.Security.psm1"
 
@@ -56,12 +58,32 @@ function Test-UTSDomainConnectivity {
     #>
     [CmdletBinding()]
     param (
+        # Fully qualified domain to check connectivity to if machine isn't domain joined
+        [Parameter()]
+        [string]
+        $FQDN = ""
     )
 
-    #region Define variables
-    $Warning = [System.Collections.Generic.List[string]]::new()
-    $OurCheckErrors = [System.Collections.Generic.List[string]]::new()
-    #endregion Definte variables
+    # If a domain is specified
+    if ($FQDN -ne "") {
+        $Domain = $FQDN
+    } else {
+        #Checking we are on a domain
+        $SystemInfo = Get-WmiObject Win32_ComputerSystem
+        if ($SystemInfo.DomainRole -in @(0,2)) {
+            Write-Verbose "This computer is not joined to a domain and a FQDN has not been specified. Tests completed, exiting"
+            return $True
+        }
+        $Domain = $SystemInfo.Domain
+    }
+
+    #region Define variables 
+    $Warning = [System.Collections.Generic.List[string]]::new() 
+    $OurCheckError = [System.Collections.Generic.List[string]]::new() 
+    #endregion Definte variables 
+    
+    
+
 
     #region Check all DNS Servers are private
     Write-Information "Checking DNS Servers are all private IPs"
@@ -80,11 +102,11 @@ function Test-UTSDomainConnectivity {
     Write-Information "Finished DNS Private IP Checks."
 
     #endregion Check all DNS Servers are private
+    
 
     #region Check all DNS servers resolve the domain kerberos and ldap records
     Write-Information "Testing we can resolve domain controllers"
-    $Domain = (Get-WmiObject Win32_ComputerSystem).Domain
-    Write-Verbose "Domain is [$Domain]"
+    
     Write-Verbose "Getting LDAP records"
 
     $LDAPRecords = Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
@@ -162,11 +184,11 @@ function Test-UTSDomainConnectivity {
         Write-Verbose "No warnings were raised"
     }
 
-    if ($OurCheckErrors.Count -gt 0) {
+    if ($OurCheckError.Count -gt 0) {
         Write-Information "`n`n-------------------Errors------------------"
         Write-Information "These are errors, the domain is not working correctly for this device."
         Write-Information "The following errors were raised:`n"
-        $OurCheckErrorsString = $OurCheckErrors -Join "`n"
+        $OurCheckErrorsString = $OurCheckError -Join "`n"
         Write-Information $OurCheckErrorsString
         Write-Information "------------------------------------------------`n`n"
         return $False
