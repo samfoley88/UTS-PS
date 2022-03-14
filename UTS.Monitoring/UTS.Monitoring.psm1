@@ -153,6 +153,6 @@ function Test-UTSDomainConnectivity {
         
     Write-Information "All checks are finished."
 
-    return Invoke-UTSLogOutput
+    return Invoke-UTSLogOutput -RMMAlertCategory "Domain Connectivity Checks"
 
 }
