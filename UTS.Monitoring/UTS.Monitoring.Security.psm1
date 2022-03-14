@@ -117,7 +117,7 @@ function Test-UTSNoNewElevatedLogins {
         $Age
     )
 
-    if ($Age -ne $null) {
+    if ($Age -ne 0) {
         Write-Verbose "Using age of [$Age] hours"
         $AgeParam = @{
             Age = $Age
