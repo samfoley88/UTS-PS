@@ -101,13 +101,13 @@ function Test-UTSDomainConnectivity {
     
     Write-Verbose "Getting LDAP records"
 
-    $LDAPRecords = Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
+    $LDAPRecords = Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "Ignore"
     if ($null -eq $LDAPRecords) {
         Write-UTSError "No LDAP Records found for domain [$Domain]"
     } else {
         Write-Verbose "LDAP records found"
         $LDAPRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
-            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
+            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "Ignore" -Quiet
             if ($ConnectionTestResult -eq $false) {
                 Write-UTSError "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
             }
@@ -118,13 +118,13 @@ function Test-UTSDomainConnectivity {
     
     Write-Verbose "Getting kerberos records"
 
-    $kerberosRecords = Resolve-DnsName -Name "_kerberos._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "SilentlyContinue"
+    $kerberosRecords = Resolve-DnsName -Name "_kerberos._tcp.dc._msdcs.$Domain" -Type SRV -ErrorAction "Ignore"
     if ($null -eq $kerberosRecords) {
         Write-UTSError "No kerberos Records found for domain [$Domain]"
     } else {
         Write-Verbose "kerberos records found"
         $kerberosRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
-            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "SilentlyContinue" -Quiet
+            $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "Ignore" -Quiet
             if ($ConnectionTestResult -eq $false) {
                 Write-UTSError = "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
             }
