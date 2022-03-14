@@ -57,7 +57,7 @@ function Get-UTSElevatedLogins {
         }
 
         # Check if this is a computer account login
-        if ($ADComputerAccounts -contains $AccountName) {
+        if ($ADComputerAccounts.ContainsKey($AccountName)) {
             Write-Verbose "This is a computer account login, skipping, login name was: [$AccountName]"
             # We use return because the ForEach-Object loop will continue to the next iteration using this rather than continue. This appears to be because its executed as a script block not a true loop.
             return
