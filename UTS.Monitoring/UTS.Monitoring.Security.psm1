@@ -15,9 +15,12 @@ function Get-UTSElevatedLogins {
     Write-Verbose "Getting computer accounts to compare with"
     # Check if this is a computer account login
     if (Get-Command Get-ADComputer -ErrorAction Ignore) {
-        $ADComputerAccounts = Get-ADComputer -Filter * | Select-Object SamAccountName
+        $ADComputerAccounts = @{}
+        Get-ADComputer -Filter * | ForEach-Object {
+            $ADComputerAccounts.Add($_.SamAccountName,$True)
+        }
     } else {
-        $ADComputerAccounts = @("")
+        $ADComputerAccounts = @{}
     }
 
     $ElevatedLoginsToReturn = New-Object System.Collections.ArrayList
