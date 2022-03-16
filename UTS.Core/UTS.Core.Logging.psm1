@@ -106,7 +106,10 @@ function Invoke-UTSLogOutput {
         # Specify the category of an RMM alert to generate. Defaults to not generating one.
         [Parameter()]
         [string]
-        $RMMAlertCategory
+        $RMMAlertCategory,
+        [Parameter()]
+        [switch]
+        $SuppressRMMAlert
     )
     
 
@@ -134,12 +137,17 @@ function Invoke-UTSLogOutput {
         
         # If required log the message to RMM
         if ((Get-Command RMM-Alert -ErrorAction "Ignore")) {
-            if ($RMMAlertCategory -eq ""){
-                Write-Debug "RMM alert category not set, setting to default 'Default Script Alert'"
-                $RMMAlertCategory = "Default Script Alert"
+            if ($SuppressRMMAlert) {
+                Write-Verbose "RMM alert suppressed, not creating"
+            } else {
+                if ($RMMAlertCategory -eq ""){
+                    Write-Debug "RMM alert category not set, setting to default 'Default Script Alert'"
+                    $RMMAlertCategory = "Default Script Alert"
+                }
+                Write-Debug "Detected Syncro Module and RMM Category, creating RMM Alert for errors"
+                Rmm-Alert -Category $RMMAlertCategory -Body $ErrorsMessage
             }
-            Write-Debug "Detected Syncro Module and RMM Category, creating RMM Alert for errors"
-            Rmm-Alert -Category $RMMAlertCategory -Body $ErrorsMessage
+            
         }
 
         $ReturnValue = $False

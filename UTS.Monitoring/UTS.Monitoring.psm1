@@ -61,7 +61,10 @@ function Test-UTSDomainConnectivity {
         # Fully qualified domain to check connectivity to if machine isn't domain joined
         [Parameter()]
         [string]
-        $FQDN = ""
+        $FQDN = "",
+        [Parameter()]
+        [switch]
+        $SuppressRMMAlert
     )
 
     # If a domain is specified
@@ -152,6 +155,14 @@ function Test-UTSDomainConnectivity {
     }
         
     Write-Information "All checks are finished."
+
+    if ($SuppressRMMAlert) {
+        Write-Verbose "Returning log and not suppressing RMM Alert"
+        return Invoke-UTSLogOutput -RMMAlertCategory "Domain Connectivity Checks"
+    } else {
+        Write-Verbose "Returning log and not Suppressing RMM Alert"
+        return Invoke-UTSLogOutput -RMMAlertCategory "Domain Connectivity Checks" -SuppressRMMAlert
+    }
 
     return Invoke-UTSLogOutput -RMMAlertCategory "Domain Connectivity Checks"
 
