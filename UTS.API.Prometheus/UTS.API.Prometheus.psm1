@@ -49,14 +49,10 @@ function New-UTSPrometheusDiscoveryFileFromAD {
     .OUTPUTS
         Saves a discovery file to -OutputFile. If no file is specified, the file is saved to the current directory as PrometheusDiscovery.json
     .EXAMPLE
-        New-UTSPrometheusDiscoveryFileFromAD -OutputFile "C:\PromDiscovery.json" -JobName "TestJobDiscovery"
+        New-UTSPrometheusDiscoveryFileFromAD -JobName "TestJobDiscovery"
     #>
     [CmdletBinding()]
     param (
-        # The output location for the discovery file, default to .\PrometheusDiscovery.json
-        [Parameter()]
-        [string]
-        $OutputFile = "PrometheusDiscovery.json",
         # The job name to use for the discovery file, mandatory
         [Parameter(Mandatory)]
         [string]
@@ -75,7 +71,78 @@ function New-UTSPrometheusDiscoveryFileFromAD {
         $TargetList.Add($PromTarget)
     }
 
+    return $TargetList
+}
+
+function New-UTSPrometheusBasicDockerTargets {
+    [CmdletBinding()]
+    param (
+        # The target IP or hostname the docker server is hosted on and to gather metrics from
+        [Parameter(Mandatory)]
+        [string]
+        $Target,
+        # A specific "Host" label to use for the target, defaults to the "Target" value
+        [Parameter()]
+        [string]
+        $HostLabel = $Target
+    )
+
+    $TargetList = New-Object System.Collections.Generic.List[Hashtable]
+
+    $PromTarget = @{
+        targets = @("$($Target):8080")
+        labels  = @{
+            "job" = "cAdvisors"
+            "host" = $HostLabel
+        }
+    }  
+    
+    $TargetList.Add($PromTarget)
+
+    
+    $PromTarget = @{
+        targets = @("$($Target):9100")
+        labels  = @{
+            "job" = "LinuxBoxes"
+            "host" = $HostLabel
+        }
+    }  
+    
+    $TargetList.Add($PromTarget)
+    
+    return $TargetList
+}
+
+function New-UTSPrometheusDiscoveryFileFromTargets {
+    <#
+    .SYNOPSIS
+        Creates a discovery file from a list of targets based by the other Prometheus target functions
+    .OUTPUTS
+        Outputs discovery file to -OutputFile. If no file is specified, the file is saved to the current directory as PrometheusDiscovery.json
+    .EXAMPLE
+        $DockerTargets = New-UTSPrometheusBasicDockerTargets -Target "LocalLoggingHost"
+        $DockerTargets2 = New-UTSPrometheusBasicDockerTargets -Target "AnotherTarget"
+        $ADTargets = New-UTSPrometheusDiscoveryFileFromAD -JobName "TestJobDiscovery"
+        New-UTSPrometheusDiscoveryFileFromTargets -OutputFile "C:\PromDiscovery.json" $DockerTargets $DockerTargets2 $ADTargets 
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ValueFromRemainingArguments)]
+        [Object]
+        $Targets,
+        # The output location for the discovery file, default to .\PrometheusDiscovery.json
+        [Parameter()]
+        [string]
+        $OutputFile = "PrometheusDiscovery.json"
+    )
+    $FullTargetList = New-Object System.Collections.Generic.List[Hashtable]
+
+    $Targets | ForEach-Object {
+        Write-Debug "Adding [$($_ | ConvertTo-Json -Compress)] to list"
+        $FullTargetList = $FullTargetList + $_
+    }
+
     Write-Verbose "Writing discovery file to [$OutputFile]"
-    ConvertTo-Json $TargetList | Out-File -FilePath $OutputFile
+    ConvertTo-Json $FullTargetList | Out-File -FilePath $OutputFile
 
 }
