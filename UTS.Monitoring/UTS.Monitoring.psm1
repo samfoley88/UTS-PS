@@ -129,7 +129,7 @@ function Test-UTSDomainConnectivity {
         $kerberosRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
             $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "Ignore" -Quiet
             if ($ConnectionTestResult -eq $false) {
-                Write-UTSError = "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
+                Write-UTSError "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
             }
         }
     }
