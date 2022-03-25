@@ -227,3 +227,26 @@ function Get-UTSUnprocessed {
     #endregion Return deduplicated array
 
 }
+
+
+function Get-UTSFileFromInternet {
+    param (
+        # The file
+        [Parameter(Mandatory=$True)]
+        [string]
+        $SourceURL,
+        # The destination
+        [Parameter(Mandatory=$True)]
+        [string]
+        $DestinationFile
+    )
+    
+    if (Test-Path $DestinationFile -Type Leaf) {
+        Write-Verbose "File already exists, not downloading, returning true"
+    } else {
+        Invoke-WebRequest -UseBasicParsing $SourceURL -Out $DestinationFile
+    }
+
+
+    
+}
