@@ -1,8 +1,16 @@
-$InformationPreference = "Continue"
-$VerbosePreference = "Continue"
-$DebugPreference = "Continue"
+#$InformationPreference = "Continue"
+#$VerbosePreference = "Continue"
+#$DebugPreference = "Continue"
 
 function Invoke-UTSSSHCommand {
+    <#
+    .SYNOPSIS
+        Invokes a command (or set of commands) on a remote machine using SSH.
+    .OUTPUTS
+        True if the command was successful, false otherwise.
+    .EXAMPLE
+        Invoke-UTSSHCommand -ComputerName "mymachine" -Command "ls -al" -SSHUser "ubuntu" -SSHKey "C:\users\myuser\mykey.pem"
+    #>
     param (
         # The name/IP of the target
         [Parameter(Mandatory=$true)]
