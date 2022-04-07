@@ -112,7 +112,12 @@ function Test-UTSDomainConnectivity {
         $LDAPRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
             $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "Ignore" -Quiet
             if ($ConnectionTestResult -eq $false) {
-                Write-UTSError "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
+                Write-Verbose "First ping test failed, sleeping 5 seconds and trying second"
+                Start-Sleep 5
+                if ($ConnectionTestResult -eq $false) {
+                    Write-Verbose "Second ping test failed"
+                    Write-UTSError "LDAP Test: Cannot ping LDAP Server: [$($_.IP4Address)]"
+                }
             }
         }
     }
@@ -129,7 +134,11 @@ function Test-UTSDomainConnectivity {
         $kerberosRecords | Where-Object {$null -ne $_.IP4Address} | ForEach-Object { 
             $ConnectionTestResult = Test-Connection $_.IP4Address -Count 1 -ErrorAction "Ignore" -Quiet
             if ($ConnectionTestResult -eq $false) {
-                Write-UTSError "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
+                Write-Verbose "First ping test failed, sleeping 5 seconds and trying second"
+                Start-Sleep 5
+                if ($ConnectionTestResult -eq $false) {
+                    Write-UTSError "kerberos Test: Cannot ping kerberos Server: [$($_.IP4Address)]"
+                }
             }
         }
     }
