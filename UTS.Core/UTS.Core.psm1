@@ -244,6 +244,8 @@ function Get-UTSFileFromInternet {
     if (Test-Path $DestinationFile -Type Leaf) {
         Write-Verbose "File already exists, not downloading, returning true"
     } else {
+        # Allow TLS1.2, should add this as an option or something but probably never will!
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         Invoke-WebRequest -UseBasicParsing $SourceURL -Out $DestinationFile
     }
 
