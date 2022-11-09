@@ -42,7 +42,7 @@ function New-UTSUbuntuVM {
     if ($InstallISO -eq "") {
         Write-Verbose "No ISO specified, requesting download"
         $InstallISO = $env:TEMP + "\ubuntu-install.iso"
-        $DownloadURL = "https://releases.ubuntu.com/20.04.4/ubuntu-20.04.4-live-server-amd64.iso"
+        $DownloadURL = "https://releases.ubuntu.com/jammy/ubuntu-22.04.1-live-server-amd64.iso"
 
         Get-UTSFileFromInternet -SourceURL $DownloadURL -DestinationFile $InstallISO
     }
