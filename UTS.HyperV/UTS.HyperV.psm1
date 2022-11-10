@@ -24,7 +24,7 @@ function New-UTSUbuntuVM {
         $Path = "C:\Hyper-V",
         # The unattend ISO to use (if not default)
         [string] 
-        $UnattendISO = "$env:ProgramFiles\WindowsPowerShell\Modules\Files\DefaultUbuntuUnattend.iso",
+        $UnattendISO = "$env:ProgramFiles\WindowsPowerShell\Modules\UTS.HyperV\Files\DefaultUbuntuUnattend.iso",
         # The install ISO to use (if not default)
         [string]
         $InstallISO = "",
@@ -58,4 +58,8 @@ function New-UTSUbuntuVM {
     Set-VMProcessor -VMName $Name -Count 2
 
     Start-VM -VMName $Name
+
+    Write-Output "Your VM has been created, you now need to open it on console and when you see a prompt asking whether you want to proceed with auto-config, enter yes and hit enter."
+    Write-Output "The prompt may be anywhere in the last few lines of output and once you've entered yes there will be limited output for upto several minutes before things really start moving."
+    Write-Output "The line 'Reached target Cloud-Init target' indicates the machine is ready for use."
 }
