@@ -229,6 +229,7 @@ function Get-UTSUnprocessed {
 }
 
 
+# This needs updating to use a better transfer mechanism as per: https://superuser.com/questions/1097048/download-big-files-with-powershell
 function Get-UTSFileFromInternet {
     param (
         # The file
@@ -241,14 +242,14 @@ function Get-UTSFileFromInternet {
         $DestinationFile
     )
     
-    if (Test-Path $DestinationFile -Type Leaf) {
-        Write-Verbose "File already exists, not downloading, returning true"
-    } else {
-        # Allow TLS1.2, should add this as an option or something but probably never will!
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -UseBasicParsing $SourceURL -Out $DestinationFile
-    }
-
-
+    # Using BITS credit to this answer: https://superuser.com/questions/1097048/download-big-files-with-powershell 
+    # Get time so we can say how long it took
+    $StartTime = Get-Date
+    # Import the module
+    Import-Module BitsTransfer
+    # Start transfer
+    Start-BitsTransfer -Source $SourceURL -Destination $DestinationFile
+    # Output time taken
+    Write-Output "Time taken: $((Get-Date).Subtract($StartTime).Seconds) second(s)"
     
 }
